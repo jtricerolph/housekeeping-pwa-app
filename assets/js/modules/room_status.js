@@ -4,6 +4,9 @@
  * @package Housekeeping_PWA_App
  */
 
+(function($) {
+    'use strict';
+
 window.HKAModule_room_status = {
     rooms: [],
     filteredRooms: [],
@@ -279,3 +282,5 @@ window.HKAModule_room_status = {
         return labels[status] || status;
     }
 };
+
+})(jQuery);
