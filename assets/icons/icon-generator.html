@@ -128,8 +128,9 @@
     </div>
 
     <script>
-        // Material Design vacuum icon SVG path
-        const vacuumIconPath = 'M4,2C2.89,2 2,2.89 2,4V6H1V8H2V10H1V12H2V14H1V16H2V20C2,21.11 2.89,22 4,22H10C11.11,22 12,21.11 12,20V4C12,2.89 11.11,2 10,2H4M7,4A2,2 0 0,1 9,6A2,2 0 0,1 7,8A2,2 0 0,1 5,6A2,2 0 0,1 7,4M7,10L8.5,11.5L9.92,10.08L11,11.15V20H3V11.15L4.08,10.08L5.5,11.5L7,10M22,11V9L15,12L22,15V13H14V11H22Z';
+        // Material Symbols vacuum icon SVG path (960x960 viewBox)
+        const vacuumIconPath = 'M160-80q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35Zm0-80q17 0 28.5-11.5T200-200q0-17-11.5-28.5T160-240q-17 0-28.5 11.5T120-200q0 17 11.5 28.5T160-160Zm160 80q14-18 22.5-37.5T356-160h84v-280q0-33-23.5-56.5T360-520H160v120q-21 0-41.5 4T80-384v-216h120v-136q0-77 53.5-130.5T384-920q56 0 102 30.5t68 81.5l273 648h93v80H640v-80h100L481-776q-12-29-38.5-46.5T384-840q-44 0-74 30t-30 74v136h80q66 0 113 47t47 113v360H320Zm-20-260Z';
+        const viewBoxSize = 960; // Material Symbols use 960x960 viewBox
 
         function generateIcons() {
             const bgColor = document.getElementById('bgColor').value;
@@ -157,13 +158,13 @@
             const iconSize = size * 0.6;
             const padding = (size - iconSize) / 2;
 
-            // Draw vacuum icon using Material Design path
+            // Draw vacuum icon using Material Symbols path
             ctx.save();
-            ctx.translate(padding, padding);
+            ctx.translate(padding, padding + iconSize); // Translate to bottom-left since viewBox is -960
 
-            // Scale to fit
-            const scale = iconSize / 24; // Material icons are 24x24
-            ctx.scale(scale, scale);
+            // Scale to fit (Material Symbols use 960x960 viewBox with negative Y)
+            const scale = iconSize / viewBoxSize;
+            ctx.scale(scale, -scale); // Flip Y axis for negative viewBox
 
             // Draw the icon
             ctx.fillStyle = iconColor;
