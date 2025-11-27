@@ -31,11 +31,21 @@ window.HKAModule_room_status = {
                 this.filteredRooms = this.rooms;
                 this.render();
             } else {
-                HKApp.toast('Failed to load room status', 'error');
+                const errorMsg = response.data?.message || 'Failed to load room status';
+                console.error('Room status error:', errorMsg);
+                HKApp.toast(errorMsg, 'error');
             }
         } catch (error) {
             console.error('Error loading room status:', error);
-            HKApp.toast('Error loading room status', 'error');
+            // Show actual error details
+            const errorMsg = error.responseJSON?.data?.message || error.statusText || 'Error loading room status';
+            console.log('Error details:', {
+                status: error.status,
+                statusText: error.statusText,
+                responseJSON: error.responseJSON,
+                responseText: error.responseText
+            });
+            HKApp.toast(errorMsg, 'error');
         }
     },
 
