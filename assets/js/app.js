@@ -339,12 +339,23 @@
                 $('.hka-install-prompt').show();
 
                 $('.hka-install-btn').off('click').on('click', async () => {
+                    console.log('Install button clicked');
                     if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        console.log(`User response: ${outcome}`);
-                        $('.hka-install-prompt').hide();
-                        deferredPrompt = null;
+                        console.log('deferredPrompt exists, calling prompt()');
+                        try {
+                            await deferredPrompt.prompt();
+                            console.log('prompt() called successfully');
+                            const { outcome } = await deferredPrompt.userChoice;
+                            console.log(`User response: ${outcome}`);
+                            $('.hka-install-prompt').hide();
+                            deferredPrompt = null;
+                        } catch (error) {
+                            console.error('Error showing install prompt:', error);
+                            alert('Install prompt error: ' + error.message);
+                        }
+                    } else {
+                        console.error('No deferredPrompt available');
+                        alert('Install prompt not available. Try using Chrome menu: ⋮ → Install app');
                     }
                 });
 
