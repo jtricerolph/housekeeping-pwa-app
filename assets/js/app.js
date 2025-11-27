@@ -31,13 +31,8 @@
                 this.loadModule(firstModule);
             }
 
-            // Debug install prompt
-            console.log('PWA Debug:', {
-                isHTTPS: window.location.protocol === 'https:',
-                isInstalled: window.matchMedia('(display-mode: standalone)').matches,
-                hasServiceWorker: 'serviceWorker' in navigator,
-                userAgent: navigator.userAgent
-            });
+            // Debug PWA setup
+            this.debugPWA();
         },
 
         /**
@@ -381,6 +376,165 @@
             } else {
                 $('.hka-offline-indicator').show();
             }
+        },
+
+        /**
+         * Debug PWA functionality.
+         */
+        async debugPWA() {
+            const debugInfo = {
+                protocol: window.location.protocol,
+                isHTTPS: window.location.protocol === 'https:',
+                isInstalled: window.matchMedia('(display-mode: standalone)').matches,
+                hasServiceWorker: 'serviceWorker' in navigator,
+                userAgent: navigator.userAgent,
+                isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+                isAndroid: /Android/.test(navigator.userAgent),
+                isChrome: /Chrome/.test(navigator.userAgent),
+                manifestUrl: $('link[rel="manifest"]').attr('href'),
+                swRegistration: null,
+                manifestData: null,
+                errors: []
+            };
+
+            console.log('=== PWA Debug Info ===');
+            console.log('Protocol:', debugInfo.protocol);
+            console.log('Is HTTPS:', debugInfo.isHTTPS);
+            console.log('Is Installed:', debugInfo.isInstalled);
+            console.log('Has SW Support:', debugInfo.hasServiceWorker);
+            console.log('Is iOS:', debugInfo.isIOS);
+            console.log('Is Android:', debugInfo.isAndroid);
+            console.log('Manifest URL:', debugInfo.manifestUrl);
+
+            // Check service worker registration
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        debugInfo.swRegistration = {
+                            active: !!registration.active,
+                            installing: !!registration.installing,
+                            waiting: !!registration.waiting,
+                            scope: registration.scope
+                        };
+                        console.log('SW Registration:', debugInfo.swRegistration);
+                    } else {
+                        debugInfo.errors.push('Service worker not registered');
+                        console.warn('Service worker not registered');
+                    }
+                } catch (error) {
+                    debugInfo.errors.push('SW check error: ' + error.message);
+                    console.error('SW check error:', error);
+                }
+            }
+
+            // Check manifest
+            if (debugInfo.manifestUrl) {
+                try {
+                    const response = await fetch(debugInfo.manifestUrl);
+                    if (response.ok) {
+                        debugInfo.manifestData = await response.json();
+                        console.log('Manifest loaded:', debugInfo.manifestData);
+                    } else {
+                        debugInfo.errors.push('Manifest HTTP ' + response.status);
+                        console.error('Manifest failed to load:', response.status);
+                    }
+                } catch (error) {
+                    debugInfo.errors.push('Manifest fetch error: ' + error.message);
+                    console.error('Manifest fetch error:', error);
+                }
+            } else {
+                debugInfo.errors.push('Manifest URL not found');
+            }
+
+            // Create debug panel
+            this.createDebugPanel(debugInfo);
+        },
+
+        /**
+         * Create visible debug panel.
+         */
+        createDebugPanel(info) {
+            const $panel = $('<div>')
+                .attr('id', 'hka-debug-panel')
+                .css({
+                    position: 'fixed',
+                    bottom: '80px',
+                    right: '10px',
+                    background: 'rgba(0,0,0,0.9)',
+                    color: '#fff',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    maxWidth: '300px',
+                    maxHeight: '400px',
+                    overflow: 'auto',
+                    zIndex: 9999,
+                    fontFamily: 'monospace',
+                    lineHeight: '1.4',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                });
+
+            const statusColor = info.errors.length === 0 ? '#4caf50' : '#ff9800';
+
+            let html = `<div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #444;">
+                <strong style="color: ${statusColor};">PWA Debug Info</strong>
+                <button id="hka-debug-close" style="float: right; background: none; border: none; color: #fff; cursor: pointer; font-size: 16px;">×</button>
+            </div>`;
+
+            html += `<div style="margin-bottom: 8px;">
+                <strong>Protocol:</strong> ${info.protocol}<br>
+                <strong>HTTPS:</strong> ${info.isHTTPS ? '✓' : '✗'}<br>
+                <strong>Installed:</strong> ${info.isInstalled ? '✓' : '✗'}<br>
+                <strong>SW Support:</strong> ${info.hasServiceWorker ? '✓' : '✗'}<br>
+                <strong>Platform:</strong> ${info.isIOS ? 'iOS' : info.isAndroid ? 'Android' : 'Other'}<br>
+            </div>`;
+
+            if (info.swRegistration) {
+                html += `<div style="margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #444;">
+                    <strong>Service Worker:</strong><br>
+                    Active: ${info.swRegistration.active ? '✓' : '✗'}<br>
+                    Installing: ${info.swRegistration.installing ? 'Yes' : 'No'}<br>
+                    Scope: ${info.swRegistration.scope}
+                </div>`;
+            }
+
+            if (info.manifestData) {
+                html += `<div style="margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #444;">
+                    <strong>Manifest:</strong> ✓ Loaded<br>
+                    Name: ${info.manifestData.name || 'N/A'}<br>
+                    Icons: ${info.manifestData.icons?.length || 0}
+                </div>`;
+            }
+
+            if (info.errors.length > 0) {
+                html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444; color: #ff9800;">
+                    <strong>Issues:</strong><br>
+                    ${info.errors.map(err => `• ${err}`).join('<br>')}
+                </div>`;
+            }
+
+            if (info.isIOS) {
+                html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444; color: #2196f3;">
+                    <strong>iOS Note:</strong><br>
+                    Use Safari Share → Add to Home Screen
+                </div>`;
+            }
+
+            $panel.html(html);
+            $('body').append($panel);
+
+            // Close button
+            $('#hka-debug-close').on('click', () => {
+                $panel.fadeOut(() => $panel.remove());
+            });
+
+            // Auto-hide after 15 seconds
+            setTimeout(() => {
+                if ($panel.length) {
+                    $panel.fadeOut(() => $panel.remove());
+                }
+            }, 15000);
         }
     };
 
