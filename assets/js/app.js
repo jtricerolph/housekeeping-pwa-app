@@ -20,7 +20,7 @@
             this.modules = hkaData.modules || {};
             this.bindEvents();
             this.setupDatePicker();
-            this.renderModuleNav();
+            this.renderSidebarModules();
             this.registerServiceWorker();
             this.setupInstallPrompt();
             this.checkOnlineStatus();
@@ -30,6 +30,14 @@
             if (firstModule) {
                 this.loadModule(firstModule);
             }
+
+            // Debug install prompt
+            console.log('PWA Debug:', {
+                isHTTPS: window.location.protocol === 'https:',
+                isInstalled: window.matchMedia('(display-mode: standalone)').matches,
+                hasServiceWorker: 'serviceWorker' in navigator,
+                userAgent: navigator.userAgent
+            });
         },
 
         /**
@@ -45,8 +53,11 @@
             // Refresh button
             $('.hka-refresh-btn').on('click', () => this.refresh());
 
-            // Menu button
-            $('.hka-menu-btn').on('click', () => this.toggleMenu());
+            // Menu button - opens sidebar
+            $('.hka-menu-btn').on('click', () => this.openSidebar());
+
+            // Sidebar close
+            $('.hka-sidebar-close, .hka-sidebar-overlay').on('click', () => this.closeSidebar());
 
             // Online/offline status
             window.addEventListener('online', () => this.updateOnlineStatus(true));
@@ -105,27 +116,43 @@
         },
 
         /**
-         * Render module navigation.
+         * Render sidebar modules.
          */
-        renderModuleNav() {
-            const $nav = $('.hka-module-nav');
-            $nav.empty();
+        renderSidebarModules() {
+            const $container = $('.hka-sidebar-modules');
 
             Object.keys(this.modules).forEach(moduleId => {
                 const module = this.modules[moduleId];
                 const $button = $('<button>')
-                    .addClass('hka-module-btn')
+                    .addClass('hka-sidebar-module-btn')
                     .attr('data-module', moduleId)
                     .html(`
-                        <span class="dashicons dashicons-${module.icon}"></span>
+                        <span class="dashicons dashicons-${module.icon}" style="color: ${module.color}"></span>
                         <span>${module.name}</span>
                     `)
-                    .on('click', () => this.loadModule(moduleId));
+                    .on('click', () => {
+                        this.loadModule(moduleId);
+                        this.closeSidebar();
+                    });
 
-                $nav.append($button);
+                $container.append($button);
             });
+        },
 
-            $nav.show();
+        /**
+         * Open sidebar menu.
+         */
+        openSidebar() {
+            $('.hka-sidebar').addClass('open');
+            $('body').css('overflow', 'hidden');
+        },
+
+        /**
+         * Close sidebar menu.
+         */
+        closeSidebar() {
+            $('.hka-sidebar').removeClass('open');
+            $('body').css('overflow', '');
         },
 
         /**

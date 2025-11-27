@@ -75,10 +75,37 @@ $current_user = wp_get_current_user();
         </div>
     </div>
 
-    <!-- User Info Bar -->
-    <div class="hka-user-bar">
-        <span class="hka-user-name"><?php echo esc_html($current_user->display_name); ?></span>
-        <a href="<?php echo wp_logout_url(home_url()); ?>" class="hka-logout">Logout</a>
+    <!-- Sidebar Menu -->
+    <div class="hka-sidebar">
+        <div class="hka-sidebar-overlay"></div>
+        <div class="hka-sidebar-content">
+            <div class="hka-sidebar-header">
+                <h3>Menu</h3>
+                <button class="hka-sidebar-close" aria-label="Close Menu">×</button>
+            </div>
+
+            <div class="hka-sidebar-user">
+                <div class="hka-user-avatar">
+                    <?php echo get_avatar($current_user->ID, 48); ?>
+                </div>
+                <div class="hka-user-info">
+                    <strong><?php echo esc_html($current_user->display_name); ?></strong>
+                    <span><?php echo esc_html($current_user->user_email); ?></span>
+                </div>
+            </div>
+
+            <div class="hka-sidebar-modules">
+                <h4>Modules</h4>
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div class="hka-sidebar-footer">
+                <a href="<?php echo wp_logout_url(home_url()); ?>" class="hka-logout-btn">
+                    <span class="dashicons dashicons-exit"></span>
+                    Logout
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Date Picker -->
