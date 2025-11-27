@@ -382,6 +382,34 @@
          * Debug PWA functionality.
          */
         async debugPWA() {
+            console.log('=== PWA Debug Starting ===');
+
+            // Create panel immediately with loading state
+            const $panel = $('<div>')
+                .attr('id', 'hka-debug-panel')
+                .css({
+                    position: 'fixed',
+                    bottom: '10px',
+                    right: '10px',
+                    background: 'rgba(0,0,0,0.95)',
+                    color: '#fff',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    maxWidth: '90%',
+                    width: '300px',
+                    maxHeight: '80vh',
+                    overflow: 'auto',
+                    zIndex: 9999,
+                    fontFamily: 'monospace',
+                    lineHeight: '1.5',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                })
+                .html('<div style="color: #4caf50;"><strong>PWA Debug</strong><br>Loading...</div>');
+
+            $('body').append($panel);
+            console.log('Debug panel created and appended');
+
             const debugInfo = {
                 protocol: window.location.protocol,
                 isHTTPS: window.location.protocol === 'https:',
@@ -397,7 +425,6 @@
                 errors: []
             };
 
-            console.log('=== PWA Debug Info ===');
             console.log('Protocol:', debugInfo.protocol);
             console.log('Is HTTPS:', debugInfo.isHTTPS);
             console.log('Is Installed:', debugInfo.isInstalled);
@@ -447,34 +474,14 @@
                 debugInfo.errors.push('Manifest URL not found');
             }
 
-            // Create debug panel
-            this.createDebugPanel(debugInfo);
+            // Update debug panel with results
+            this.updateDebugPanel($panel, debugInfo);
         },
 
         /**
-         * Create visible debug panel.
+         * Update debug panel with results.
          */
-        createDebugPanel(info) {
-            const $panel = $('<div>')
-                .attr('id', 'hka-debug-panel')
-                .css({
-                    position: 'fixed',
-                    bottom: '80px',
-                    right: '10px',
-                    background: 'rgba(0,0,0,0.9)',
-                    color: '#fff',
-                    padding: '15px',
-                    borderRadius: '8px',
-                    fontSize: '11px',
-                    maxWidth: '300px',
-                    maxHeight: '400px',
-                    overflow: 'auto',
-                    zIndex: 9999,
-                    fontFamily: 'monospace',
-                    lineHeight: '1.4',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
-                });
-
+        updateDebugPanel($panel, info) {
             const statusColor = info.errors.length === 0 ? '#4caf50' : '#ff9800';
 
             let html = `<div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #444;">
@@ -522,7 +529,6 @@
             }
 
             $panel.html(html);
-            $('body').append($panel);
 
             // Close button
             $('#hka-debug-close').on('click', () => {
