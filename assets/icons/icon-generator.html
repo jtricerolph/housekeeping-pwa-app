@@ -160,11 +160,17 @@
 
             // Draw vacuum icon using Material Symbols path
             ctx.save();
-            ctx.translate(padding, padding + iconSize); // Translate to bottom-left since viewBox is -960
 
-            // Scale to fit (Material Symbols use 960x960 viewBox with negative Y)
+            // Material Symbols use viewBox="0 -960 960 960"
+            // Translate to center the icon
+            ctx.translate(padding, padding);
+
+            // Scale to fit
             const scale = iconSize / viewBoxSize;
-            ctx.scale(scale, -scale); // Flip Y axis for negative viewBox
+            ctx.scale(scale, scale);
+
+            // Translate to handle negative Y coordinates (viewBox starts at -960)
+            ctx.translate(0, 960);
 
             // Draw the icon
             ctx.fillStyle = iconColor;
