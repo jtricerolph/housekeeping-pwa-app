@@ -176,6 +176,9 @@ class HKA_Core {
             return;
         }
 
+        // Ensure jQuery is loaded
+        wp_enqueue_script('jquery');
+
         // Enqueue styles
         wp_enqueue_style(
             'hka-app',

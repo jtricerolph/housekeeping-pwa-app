@@ -16,7 +16,7 @@ class HKA_PWA {
      */
     public function __construct() {
         add_action('init', array($this, 'add_rewrite_rules'));
-        add_action('template_redirect', array($this, 'serve_pwa_files'));
+        add_action('parse_request', array($this, 'serve_pwa_files_early'), 0);
         add_action('wp_head', array($this, 'add_pwa_meta_tags'));
         add_filter('query_vars', array($this, 'add_query_vars'));
     }
@@ -39,19 +39,17 @@ class HKA_PWA {
     }
 
     /**
-     * Serve PWA files.
+     * Serve PWA files early to prevent redirects.
      */
-    public function serve_pwa_files() {
-        global $wp_query;
-
-        // Serve manifest
-        if (isset($wp_query->query_vars['hka_manifest'])) {
+    public function serve_pwa_files_early($wp) {
+        // Check for manifest
+        if (isset($wp->query_vars['hka_manifest']) && $wp->query_vars['hka_manifest'] == '1') {
             $this->serve_manifest();
             exit;
         }
 
-        // Serve service worker
-        if (isset($wp_query->query_vars['hka_sw'])) {
+        // Check for service worker
+        if (isset($wp->query_vars['hka_sw']) && $wp->query_vars['hka_sw'] == '1') {
             $this->serve_service_worker();
             exit;
         }
