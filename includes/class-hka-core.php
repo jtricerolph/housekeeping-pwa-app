@@ -59,6 +59,7 @@ class HKA_Core {
 
         // Register hooks
         add_action('init', array($this, 'register_shortcodes'));
+        add_action('init', array($this, 'handle_logout'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('template_redirect', array($this, 'check_app_access'));
@@ -78,6 +79,31 @@ class HKA_Core {
 
         // Allow other plugins to register modules
         do_action('hka_register_modules', $this->modules);
+    }
+
+    /**
+     * Handle custom logout for PWA.
+     */
+    public function handle_logout() {
+        // Check if this is a logout request
+        if (!isset($_GET['hka_logout']) || $_GET['hka_logout'] !== '1') {
+            return;
+        }
+
+        // Verify nonce
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'hka-logout')) {
+            wp_die('Invalid logout request.');
+        }
+
+        // Log the user out
+        wp_logout();
+
+        // Redirect to app page
+        $app_page_id = get_option('hka_app_page_id');
+        $redirect_to = $app_page_id ? get_permalink($app_page_id) : home_url();
+
+        wp_safe_redirect($redirect_to);
+        exit;
     }
 
     /**

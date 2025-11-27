@@ -102,9 +102,16 @@ $current_user = wp_get_current_user();
             <div class="hka-sidebar-footer">
                 <?php
                 $app_page_id = get_option('hka_app_page_id');
-                $redirect_to = $app_page_id ? get_permalink($app_page_id) : home_url();
+                $app_url = $app_page_id ? get_permalink($app_page_id) : home_url();
+                $logout_url = add_query_arg(
+                    array(
+                        'hka_logout' => '1',
+                        '_wpnonce' => wp_create_nonce('hka-logout')
+                    ),
+                    $app_url
+                );
                 ?>
-                <a href="<?php echo wp_logout_url($redirect_to); ?>" class="hka-logout-btn">
+                <a href="<?php echo esc_url($logout_url); ?>" class="hka-logout-btn">
                     <span class="dashicons dashicons-exit"></span>
                     Logout
                 </a>
