@@ -281,24 +281,60 @@
         setupInstallPrompt() {
             let deferredPrompt;
 
+            // Check if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('App is already installed');
+                return;
+            }
+
+            // Detect iOS
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            // Show iOS instructions if on iOS
+            if (isIOS) {
+                // Show iOS-specific install prompt after a delay
+                setTimeout(() => {
+                    const $prompt = $('.hka-install-prompt');
+                    $prompt.find('strong').text('Add to Home Screen');
+                    $prompt.find('p').html('Tap <span class="dashicons dashicons-share-alt"></span> then "Add to Home Screen"');
+                    $prompt.find('.hka-install-btn').hide();
+                    $prompt.show();
+                }, 3000);
+
+                $('.hka-install-dismiss').on('click', () => {
+                    $('.hka-install-prompt').hide();
+                });
+                return;
+            }
+
+            // Android/Chrome install prompt
             window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('beforeinstallprompt fired');
                 e.preventDefault();
                 deferredPrompt = e;
 
                 // Show install prompt
                 $('.hka-install-prompt').show();
 
-                $('.hka-install-btn').on('click', async () => {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`User response: ${outcome}`);
-                    $('.hka-install-prompt').hide();
-                    deferredPrompt = null;
+                $('.hka-install-btn').off('click').on('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`User response: ${outcome}`);
+                        $('.hka-install-prompt').hide();
+                        deferredPrompt = null;
+                    }
                 });
 
                 $('.hka-install-dismiss').on('click', () => {
                     $('.hka-install-prompt').hide();
                 });
+            });
+
+            // Log when app is installed
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA was installed');
+                $('.hka-install-prompt').hide();
             });
         },
 

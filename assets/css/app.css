@@ -162,10 +162,25 @@
 .hka-module-nav {
     background: white;
     padding: 1rem;
-    display: flex;
+    display: none; /* Hidden by default on mobile */
     gap: 0.5rem;
     overflow-x: auto;
     border-bottom: 1px solid #e0e0e0;
+}
+
+.hka-module-nav.open {
+    display: flex; /* Show when menu button clicked */
+}
+
+/* Show module nav on desktop */
+@media (min-width: 768px) {
+    .hka-module-nav {
+        display: flex;
+    }
+
+    .hka-menu-btn {
+        display: none; /* Hide menu button on desktop */
+    }
 }
 
 .hka-module-btn {
