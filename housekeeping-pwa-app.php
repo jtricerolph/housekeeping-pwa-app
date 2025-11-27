@@ -61,18 +61,27 @@ spl_autoload_register(function($class) {
 
     // Convert class name to file name
     $class_file = str_replace('_', '-', strtolower($class));
-    $file_path = HKA_PLUGIN_DIR . 'includes/class-' . $class_file . '.php';
 
-    // Check in modules directory as well
-    if (!file_exists($file_path)) {
-        $module_path = HKA_PLUGIN_DIR . 'includes/modules/' . str_replace('hka-', '', $class_file) . '/class-' . $class_file . '.php';
-        if (file_exists($module_path)) {
-            $file_path = $module_path;
-        }
-    }
+    // First check standard includes directory
+    $file_path = HKA_PLUGIN_DIR . 'includes/class-' . $class_file . '.php';
 
     if (file_exists($file_path)) {
         require_once $file_path;
+        return;
+    }
+
+    // Check if it's a module class (ends with -module)
+    if (strpos($class_file, '-module') !== false) {
+        // Extract module name: hka-room-status-module -> room-status
+        $module_name = str_replace('hka-', '', $class_file);
+        $module_name = str_replace('-module', '', $module_name);
+
+        $module_path = HKA_PLUGIN_DIR . 'includes/modules/' . $module_name . '/class-' . $class_file . '.php';
+
+        if (file_exists($module_path)) {
+            require_once $module_path;
+            return;
+        }
     }
 });
 
