@@ -62,6 +62,7 @@ class HKA_Core {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('template_redirect', array($this, 'check_app_access'));
+        add_filter('template_include', array($this, 'load_standalone_template'));
 
         // Register modules
         $this->register_default_modules();
@@ -136,6 +137,27 @@ class HKA_Core {
             wp_redirect(wp_login_url(get_permalink()));
             exit;
         }
+    }
+
+    /**
+     * Load standalone template (no WordPress theme elements).
+     */
+    public function load_standalone_template($template) {
+        $app_page_id = get_option('hka_app_page_id');
+
+        // Only for app page
+        if (!$app_page_id || !is_page($app_page_id)) {
+            return $template;
+        }
+
+        // Load standalone template
+        $standalone_template = HKA_PLUGIN_DIR . 'templates/standalone.php';
+
+        if (file_exists($standalone_template)) {
+            return $standalone_template;
+        }
+
+        return $template;
     }
 
     /**
