@@ -34,8 +34,8 @@ class HKA_PWA {
      * Add rewrite rules for PWA files.
      */
     public function add_rewrite_rules() {
-        add_rewrite_rule('^manifest\.json$', 'index.php?hka_manifest=1', 'top');
-        add_rewrite_rule('^service-worker\.js$', 'index.php?hka_sw=1', 'top');
+        add_rewrite_rule('^housekeeping-manifest\.json$', 'index.php?hka_manifest=1', 'top');
+        add_rewrite_rule('^housekeeping-sw\.js$', 'index.php?hka_sw=1', 'top');
     }
 
     /**
@@ -65,11 +65,16 @@ class HKA_PWA {
         $app_page_id = get_option('hka_app_page_id');
         $start_url = $app_page_id ? get_permalink($app_page_id) : home_url();
 
+        // Set scope to the app page path to allow multiple PWAs on same domain
+        $scope = $app_page_id ? trailingslashit(parse_url(get_permalink($app_page_id), PHP_URL_PATH)) : '/';
+
         $manifest = array(
+            'id' => '/housekeeping/',  // Unique ID for this PWA
             'name' => get_bloginfo('name') . ' - Housekeeping',
             'short_name' => 'Housekeeping',
             'description' => 'Housekeeping operations management',
             'start_url' => $start_url,
+            'scope' => $scope,
             'display' => 'standalone',
             'background_color' => '#ffffff',
             'theme_color' => '#2196f3',
@@ -129,7 +134,7 @@ class HKA_PWA {
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
         <meta name="apple-mobile-web-app-title" content="Housekeeping">
-        <link rel="manifest" href="<?php echo home_url('/manifest.json'); ?>">
+        <link rel="manifest" href="<?php echo home_url('/housekeeping-manifest.json'); ?>">
         <link rel="apple-touch-icon" href="<?php echo HKA_PLUGIN_URL; ?>assets/icons/icon-192x192.png">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
         <?php

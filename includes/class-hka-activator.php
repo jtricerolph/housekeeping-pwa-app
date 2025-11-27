@@ -137,8 +137,8 @@ class HKA_Activator {
         self::create_app_page();
 
         // Add rewrite rules before flushing
-        add_rewrite_rule('^manifest\.json$', 'index.php?hka_manifest=1', 'top');
-        add_rewrite_rule('^service-worker\.js$', 'index.php?hka_sw=1', 'top');
+        add_rewrite_rule('^housekeeping-manifest\.json$', 'index.php?hka_manifest=1', 'top');
+        add_rewrite_rule('^housekeeping-sw\.js$', 'index.php?hka_sw=1', 'top');
 
         // Flush rewrite rules
         flush_rewrite_rules();

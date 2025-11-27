@@ -28,7 +28,7 @@ $current_user = wp_get_current_user();
     <title><?php echo esc_html(get_bloginfo('name')); ?> - Housekeeping</title>
 
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="<?php echo home_url('/manifest.json'); ?>">
+    <link rel="manifest" href="<?php echo home_url('/housekeeping-manifest.json'); ?>">
     <link rel="apple-touch-icon" href="<?php echo HKA_PLUGIN_URL; ?>assets/icons/icon-192x192.png">
 
     <?php
