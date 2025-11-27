@@ -31,8 +31,8 @@
                 this.loadModule(firstModule);
             }
 
-            // Debug PWA setup
-            this.debugPWA();
+            // Debug PWA setup (disabled - uncomment to debug PWA installation)
+            // this.debugPWA();
         },
 
         /**

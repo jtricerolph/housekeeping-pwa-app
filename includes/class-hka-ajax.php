@@ -45,19 +45,19 @@ class HKA_AJAX {
         // Check nonce
         if (!check_ajax_referer('hka_nonce', 'nonce', false)) {
             wp_send_json_error(array('message' => 'Invalid security token'));
-            return false;
+            exit; // Stop execution after sending error
         }
 
         // Check if user is logged in
         if (!is_user_logged_in()) {
             wp_send_json_error(array('message' => 'Not authenticated'));
-            return false;
+            exit; // Stop execution after sending error
         }
 
         // Check permission if specified
         if (!empty($permission) && !wfa_user_can($permission)) {
             wp_send_json_error(array('message' => 'Insufficient permissions'));
-            return false;
+            exit; // Stop execution after sending error
         }
 
         return true;
