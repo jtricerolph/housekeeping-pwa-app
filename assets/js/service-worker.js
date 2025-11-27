@@ -6,11 +6,9 @@
  * @package Housekeeping_PWA_App
  */
 
-const CACHE_NAME = 'hka-v1.0.0';
+const CACHE_NAME = 'hka-v1.0.1';
 const urlsToCache = [
     '/',
-    '/wp-content/plugins/housekeeping-pwa-app/assets/css/app.css',
-    '/wp-content/plugins/housekeeping-pwa-app/assets/js/app.js',
     '/wp-includes/js/jquery/jquery.min.js'
 ];
 
@@ -51,7 +49,7 @@ self.addEventListener('activate', event => {
 });
 
 /**
- * Fetch event - serve from cache, fallback to network.
+ * Fetch event - network-first for app resources, cache-first for others.
  */
 self.addEventListener('fetch', event => {
     // Skip non-GET requests
@@ -59,41 +57,60 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Skip admin-ajax.php (always fetch from network)
-    if (event.request.url.includes('admin-ajax.php')) {
+    // Always fetch from network for AJAX and API calls
+    if (event.request.url.includes('admin-ajax.php') ||
+        event.request.url.includes('/wp-json/')) {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // Return cached version or fetch from network
-                if (response) {
-                    return response;
-                }
+    // Network-first strategy for app's own CSS/JS files
+    const isAppResource = event.request.url.includes('/housekeeping-pwa-app/assets/');
 
-                return fetch(event.request).then(response => {
-                    // Don't cache non-successful responses
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
+    if (isAppResource) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    // Cache the new version
+                    if (response && response.status === 200) {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    // Fallback to cache if offline
+                    return caches.match(event.request);
+                })
+        );
+    } else {
+        // Cache-first for everything else (fonts, images, etc.)
+        event.respondWith(
+            caches.match(event.request)
+                .then(response => {
+                    if (response) {
                         return response;
                     }
 
-                    // Clone response for caching
-                    const responseToCache = response.clone();
+                    return fetch(event.request).then(response => {
+                        if (!response || response.status !== 200 || response.type !== 'basic') {
+                            return response;
+                        }
 
-                    caches.open(CACHE_NAME)
-                        .then(cache => {
+                        const responseToCache = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
                             cache.put(event.request, responseToCache);
                         });
 
-                    return response;
-                });
-            })
-            .catch(() => {
-                // Return offline page if available
-                return caches.match('/offline.html');
-            })
-    );
+                        return response;
+                    });
+                })
+                .catch(() => {
+                    return caches.match('/offline.html');
+                })
+        );
+    }
 });
 
 /**
