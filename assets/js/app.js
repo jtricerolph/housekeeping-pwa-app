@@ -384,30 +384,33 @@
         async debugPWA() {
             console.log('=== PWA Debug Starting ===');
 
-            // Create panel immediately with loading state
+            // Create panel immediately with loading state - VERY VISIBLE
             const $panel = $('<div>')
                 .attr('id', 'hka-debug-panel')
                 .css({
                     position: 'fixed',
-                    bottom: '10px',
-                    right: '10px',
-                    background: 'rgba(0,0,0,0.95)',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    background: '#ff5722',
                     color: '#fff',
-                    padding: '15px',
+                    padding: '20px',
                     borderRadius: '8px',
-                    fontSize: '12px',
-                    maxWidth: '90%',
-                    width: '300px',
+                    fontSize: '14px',
+                    width: '90%',
+                    maxWidth: '400px',
                     maxHeight: '80vh',
                     overflow: 'auto',
-                    zIndex: 9999,
+                    zIndex: 99999,
                     fontFamily: 'monospace',
-                    lineHeight: '1.5',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+                    lineHeight: '1.6',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                    border: '3px solid #fff'
                 })
-                .html('<div style="color: #4caf50;"><strong>PWA Debug</strong><br>Loading...</div>');
+                .html('<div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">🔍 PWA DEBUG PANEL</div><div>Loading info...</div>');
 
-            $('body').append($panel);
+            // Append to the app container instead of body
+            $('#hka-standalone-app').append($panel);
             console.log('Debug panel created and appended');
 
             const debugInfo = {
@@ -482,49 +485,49 @@
          * Update debug panel with results.
          */
         updateDebugPanel($panel, info) {
-            const statusColor = info.errors.length === 0 ? '#4caf50' : '#ff9800';
+            const statusIcon = info.errors.length === 0 ? '✅' : '⚠️';
 
-            let html = `<div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #444;">
-                <strong style="color: ${statusColor};">PWA Debug Info</strong>
-                <button id="hka-debug-close" style="float: right; background: none; border: none; color: #fff; cursor: pointer; font-size: 16px;">×</button>
+            let html = `<div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.3); font-size: 16px; font-weight: bold;">
+                🔍 PWA DEBUG ${statusIcon}
+                <button id="hka-debug-close" style="float: right; background: rgba(255,255,255,0.3); border: none; color: #fff; cursor: pointer; font-size: 20px; width: 30px; height: 30px; border-radius: 50%; line-height: 1;">×</button>
             </div>`;
 
-            html += `<div style="margin-bottom: 8px;">
+            html += `<div style="margin-bottom: 12px; font-size: 13px;">
                 <strong>Protocol:</strong> ${info.protocol}<br>
-                <strong>HTTPS:</strong> ${info.isHTTPS ? '✓' : '✗'}<br>
-                <strong>Installed:</strong> ${info.isInstalled ? '✓' : '✗'}<br>
-                <strong>SW Support:</strong> ${info.hasServiceWorker ? '✓' : '✗'}<br>
-                <strong>Platform:</strong> ${info.isIOS ? 'iOS' : info.isAndroid ? 'Android' : 'Other'}<br>
+                <strong>HTTPS:</strong> ${info.isHTTPS ? '✅ YES' : '❌ NO'}<br>
+                <strong>Installed:</strong> ${info.isInstalled ? '✅ YES' : '❌ NO'}<br>
+                <strong>SW Support:</strong> ${info.hasServiceWorker ? '✅ YES' : '❌ NO'}<br>
+                <strong>Platform:</strong> ${info.isIOS ? '📱 iOS' : info.isAndroid ? '🤖 Android' : '💻 Other'}<br>
             </div>`;
 
             if (info.swRegistration) {
-                html += `<div style="margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #444;">
+                html += `<div style="margin-bottom: 12px; padding-top: 8px; border-top: 2px solid rgba(255,255,255,0.3); font-size: 13px;">
                     <strong>Service Worker:</strong><br>
-                    Active: ${info.swRegistration.active ? '✓' : '✗'}<br>
+                    Active: ${info.swRegistration.active ? '✅' : '❌'}<br>
                     Installing: ${info.swRegistration.installing ? 'Yes' : 'No'}<br>
                     Scope: ${info.swRegistration.scope}
                 </div>`;
             }
 
             if (info.manifestData) {
-                html += `<div style="margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #444;">
-                    <strong>Manifest:</strong> ✓ Loaded<br>
+                html += `<div style="margin-bottom: 12px; padding-top: 8px; border-top: 2px solid rgba(255,255,255,0.3); font-size: 13px;">
+                    <strong>Manifest:</strong> ✅ Loaded<br>
                     Name: ${info.manifestData.name || 'N/A'}<br>
                     Icons: ${info.manifestData.icons?.length || 0}
                 </div>`;
             }
 
             if (info.errors.length > 0) {
-                html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444; color: #ff9800;">
-                    <strong>Issues:</strong><br>
+                html += `<div style="margin-top: 12px; padding-top: 8px; border-top: 2px solid rgba(255,255,255,0.3); font-size: 13px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px;">
+                    <strong>⚠️ Issues:</strong><br>
                     ${info.errors.map(err => `• ${err}`).join('<br>')}
                 </div>`;
             }
 
             if (info.isIOS) {
-                html += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444; color: #2196f3;">
-                    <strong>iOS Note:</strong><br>
-                    Use Safari Share → Add to Home Screen
+                html += `<div style="margin-top: 12px; padding-top: 8px; border-top: 2px solid rgba(255,255,255,0.3); font-size: 13px; background: rgba(33, 150, 243, 0.3); padding: 10px; border-radius: 4px;">
+                    <strong>📱 iOS Installation:</strong><br>
+                    Tap Safari Share button → Add to Home Screen
                 </div>`;
             }
 
@@ -535,12 +538,12 @@
                 $panel.fadeOut(() => $panel.remove());
             });
 
-            // Auto-hide after 15 seconds
+            // Auto-hide after 30 seconds
             setTimeout(() => {
                 if ($panel.length) {
                     $panel.fadeOut(() => $panel.remove());
                 }
-            }, 15000);
+            }, 30000);
         }
     };
 
